@@ -1,99 +1,78 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useContext, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import AlertContext from '../../context/alert/alertContext';
+import { useAuth, clearErrors, login } from '../../context/auth/AuthState';
 
-// Context
-import AlertContext from "../../context/alert/alertContext";
-import AuthContext from "../../context/auth/authContext";
-
-const Login = (props) => {
+const Login = () => {
   const alertContext = useContext(AlertContext);
   const { setAlert } = alertContext;
 
-  const authContext = useContext(AuthContext);
-  const { login, error, clearErrors, isAuthenticated } = authContext;
+  const [authState, authDispatch] = useAuth();
+  const { error, isAuthenticated } = authState;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      props.history.push("/");
+    if (error === 'Invalid Credentials') {
+      setAlert(error, 'danger');
+      clearErrors(authDispatch);
     }
-
-    if (error !== null && error) {
-      setAlert(error, "danger");
-      clearErrors();
-    }
-    // eslint-disable-next-line
-  }, [error, isAuthenticated, props.history]);
+  }, [error, isAuthenticated, authDispatch, setAlert]);
 
   const [user, setUser] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: ''
   });
 
   const { email, password } = user;
 
-  const onChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-  };
+  const onChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (email === "" || password === "") {
-      setAlert("Please fill in all fields!", "danger");
+    if (email === '' || password === '') {
+      setAlert('Please fill in all fields', 'danger');
     } else {
-      login({
+      login(authDispatch, {
         email,
-        password,
+        password
       });
     }
   };
+  if (isAuthenticated) return <Navigate to='/' />;
 
   return (
-    <div className="container mt-4">
-      <div align="center">
-        <h2>
-          Account <span className="text-primary">Login</span>
-        </h2>
-      </div>
-      <div className="row">
-        <div className="col-lg-3 col-md-2 col-sm-1"></div>
-        <div
-          className="col-lg-6 col-md-8 col-sm-10 mt-3"
-          // style={{ margin: "0 auto", width: "70%" }}
-        >
-          <form onSubmit={onSubmit}>
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                name="email"
-                value={email}
-                placeholder="You Email id"
-                onChange={onChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                className="form-control"
-                name="password"
-                value={password}
-                placeholder="Your Password"
-                onChange={onChange}
-                minLength="5"
-                required
-              />
-            </div>
-            <input
-              type="submit"
-              value="Login"
-              className="btn btn-primary btn-block"
-            />
-          </form>
+    <div className='form-container'>
+      <h1>
+        Account <span className='text-primary'>Login</span>
+      </h1>
+      <form onSubmit={onSubmit}>
+        <div className='form-group'>
+          <label htmlFor='email'>Email Address</label>
+          <input
+            id='email'
+            type='email'
+            name='email'
+            value={email}
+            onChange={onChange}
+            required
+          />
         </div>
-        <div className="col-lg-3 col-md-2 col-sm-1"></div>
-      </div>
+        <div className='form-group'>
+          <label htmlFor='password'>Password</label>
+          <input
+            id='password'
+            type='password'
+            name='password'
+            value={password}
+            onChange={onChange}
+            required
+          />
+        </div>
+        <input
+          type='submit'
+          value='Login'
+          className='btn btn-primary btn-block'
+        />
+      </form>
     </div>
   );
 };

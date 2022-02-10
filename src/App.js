@@ -1,48 +1,37 @@
-//import "./App.css";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import React, { Fragment } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Navbar from './components/layout/Navbar';
+import Home from './components/pages/Home';
+import About from './components/pages/About';
+import Register from './components/auth/Register';
+import Login from './components/auth/Login';
+import Alerts from './components/layout/Alert';
+import PrivateRoute from './components/routing/PrivateRoute';
 
-// Contexts States
-import ContactState from "./context/contact/ContactState";
-import AuthState from "./context/auth/AuthState";
-import AlertState from "./context/alert/AlertState";
-
-// Set Auth Token Util
-import setAuthToken from "./utils/setAuthToken";
-
-// Components
-import Navbar from "./components/layout/Navbar";
-import Home from "./components/pages/Home";
-import About from "./components/pages/About";
-import Register from "./components/auth/Register";
-import Login from "./components/auth/Login";
-import Alerts from "./components/layout/Alert";
-
-// Private Route
-import PrivateRoute from "./components/routing/PrivateRoute";
-
-if (localStorage.token) {
-  setAuthToken(localStorage.token);
-}
+import ContactState from './context/contact/ContactState';
+import AuthState from './context/auth/AuthState';
+import AlertState from './context/alert/AlertState';
+import './App.css';
 
 const App = () => {
   return (
     <AuthState>
       <ContactState>
         <AlertState>
-          <Router>
-            <>
+          <BrowserRouter>
+            <Fragment>
               <Navbar />
-              <div className="container">
+              <div className='container'>
                 <Alerts />
-                <Switch>
-                  <PrivateRoute exact path="/" component={Home} />
-                  <Route exact path="/about" component={About} />
-                  <Route exact path="/register" component={Register} />
-                  <Route exact path="/login" component={Login} />
-                </Switch>
+                <Routes>
+                  <Route path='/' element={<PrivateRoute component={Home} />} />
+                  <Route path='/about' element={<About />} />
+                  <Route path='/register' element={<Register />} />
+                  <Route path='/login' element={<Login />} />
+                </Routes>
               </div>
-            </>
-          </Router>
+            </Fragment>
+          </BrowserRouter>
         </AlertState>
       </ContactState>
     </AuthState>

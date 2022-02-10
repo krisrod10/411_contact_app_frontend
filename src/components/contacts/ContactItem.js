@@ -1,57 +1,66 @@
-import React, { useContext } from "react";
-import PropTypes from "prop-types";
-
-// Context
-import contactContext from "../../context/contact/contactContext";
+import React from 'react';
+import PropTypes from 'prop-types';
+import {
+  useContacts,
+  deleteContact,
+  setCurrent,
+  clearCurrent
+} from '../../context/contact/ContactState';
 
 const ContactItem = ({ contact }) => {
-  const ContactContext = useContext(contactContext);
-  const { deleteContact, setCurrent, clearCurrent } = ContactContext;
+  // we just need the contact dispatch without state.
+  const contactDispatch = useContacts()[1];
 
   const { _id, name, email, phone, type } = contact;
 
-  const onDelete = (e) => {
-    deleteContact(_id);
-    clearCurrent();
+  const onDelete = () => {
+    deleteContact(contactDispatch, _id);
+    clearCurrent(contactDispatch);
   };
 
   return (
-    <div className="card my-2 bg-white">
-      <div className="card-header">
-        <h5 className="d-inline align-middle card-title text-primary">
-          {name}
-        </h5>
+    <div className='card bg-light'>
+      <h3 className='text-primary text-left'>
+        {name}{' '}
         <span
+          style={{ float: 'right' }}
           className={
-            "badge badge-sm d-inline align-middle mx-auto my-auto float-right " +
-            (type === "professional" ? "badge-success" : "badge-primary")
+            'badge ' +
+            (type === 'professional' ? 'badge-success' : 'badge-primary')
           }
         >
           {type.charAt(0).toUpperCase() + type.slice(1)}
         </span>
-      </div>
-      <div className="card-body m-0 p-0 pl-4 pt-2">
-        <i className="fas fa-envelope-open"></i> {email}
-        <br />
-        <i className="fas fa-phone-alt"></i> {phone}
-      </div>
-      <div className="card-footer bg-white border-0">
+      </h3>
+      <ul className='list'>
+        {email && (
+          <li>
+            <i className='fas fa-envelope-open' /> {email}
+          </li>
+        )}
+        {phone && (
+          <li>
+            <i className='fas fa-phone' /> {phone}
+          </li>
+        )}
+      </ul>
+      <p>
         <button
-          className="btn btn-sm btn-dark px-4 mr-1"
-          onClick={() => setCurrent(contact)}
+          className='btn btn-dark btn-sm'
+          onClick={() => setCurrent(contactDispatch, contact)}
         >
           Edit
         </button>
-        <button className="btn btn-sm btn-danger px-4 mr-1" onClick={onDelete}>
+        <button className='btn btn-danger btn-sm' onClick={onDelete}>
           Delete
         </button>
-      </div>
+      </p>
     </div>
   );
 };
 
 ContactItem.propTypes = {
-  contact: PropTypes.object.isRequired,
+  contact: PropTypes.object.isRequired
 };
 
 export default ContactItem;

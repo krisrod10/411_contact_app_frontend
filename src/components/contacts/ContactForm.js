@@ -1,128 +1,112 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import {
+  addContact,
+  useContacts,
+  updateContact,
+  clearCurrent
+} from '../../context/contact/ContactState';
 
-//Context
-import contactContext from "../../context/contact/contactContext";
+const initialContact = {
+  name: '',
+  email: '',
+  phone: '',
+  type: 'personal'
+};
 
 const ContactForm = () => {
-  const ContactContext = useContext(contactContext);
-  const { current, addContact, clearCurrent, updateContact } = ContactContext;
+  const [contactState, contactDispatch] = useContacts();
 
-  const [contact, setContact] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    type: "personal",
-  });
+  const { current } = contactState;
 
-  const { name, email, phone, type } = contact;
+  const [contact, setContact] = useState(initialContact);
 
   useEffect(() => {
     if (current !== null) {
       setContact(current);
     } else {
-      clearFormFields();
+      setContact(initialContact);
     }
-  }, [contactContext, current]);
+  }, [current]);
 
-  const clearFormFields = () => {
-    setContact({
-      name: "",
-      email: "",
-      phone: "",
-      type: "personal",
-    });
-  };
+  const { name, email, phone, type } = contact;
 
-  const onChange = (e) => {
+  const onChange = (e) =>
     setContact({ ...contact, [e.target.name]: e.target.value });
-  };
 
   const onSubmit = (e) => {
     e.preventDefault();
-
-    if (current === null) addContact(contact);
-    else updateContact(contact);
-
-    clearFormFields();
-    clearCurrent();
+    if (current === null) {
+      addContact(contactDispatch, contact).then(() =>
+        setContact(initialContact)
+      );
+    } else {
+      updateContact(contactDispatch, contact);
+    }
+    clearAll();
   };
 
-  const clearAll = (e) => {
-    clearCurrent();
+  const clearAll = () => {
+    clearCurrent(contactDispatch);
   };
 
   return (
-    <>
-      <div align="center" className="my-3">
-        <h3>{current === null ? "Add" : "Edit"} Contacts</h3>
+    <form onSubmit={onSubmit}>
+      <h2 className='text-primary'>
+        {current ? 'Edit Contact' : 'Add Contact'}
+      </h2>
+      <input
+        type='text'
+        placeholder='Name'
+        name='name'
+        value={name}
+        onChange={onChange}
+      />
+      <input
+        type='email'
+        placeholder='Email'
+        name='email'
+        value={email}
+        onChange={onChange}
+      />
+      <input
+        type='text'
+        placeholder='Phone'
+        name='phone'
+        value={phone}
+        onChange={onChange}
+      />
+      <h5>Contact Type</h5>
+      <input
+        type='radio'
+        name='type'
+        value='personal'
+        checked={type === 'personal'}
+        onChange={onChange}
+      />{' '}
+      Personal{' '}
+      <input
+        type='radio'
+        name='type'
+        value='professional'
+        checked={type === 'professional'}
+        onChange={onChange}
+      />{' '}
+      Professional
+      <div>
+        <input
+          type='submit'
+          value={current ? 'Update Contact' : 'Add Contact'}
+          className='btn btn-primary btn-block'
+        />
       </div>
-      <form className="my-2" onSubmit={onSubmit}>
-        <div className="form-group">
-          <input
-            className="form-control"
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={name}
-            onChange={onChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <input
-            className="form-control"
-            type="text"
-            name="email"
-            placeholder="Email"
-            value={email}
-            onChange={onChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <input
-            className="form-control"
-            type="text"
-            name="phone"
-            placeholder="Phone"
-            value={phone}
-            onChange={onChange}
-            required
-          />
-        </div>
-        Contact Type:{" "}
-        <div className="form-group">
-          <input
-            type="radio"
-            name="type"
-            value="personal"
-            checked={type === "personal"}
-            onChange={onChange}
-          />{" "}
-          Personal{" "}
-          <input
-            type="radio"
-            name="type"
-            value="professional"
-            checked={type === "professional"}
-            onChange={onChange}
-          />{" "}
-          Professional
-        </div>
-        <div className="form-group">
-          <button className="btn btn-primary btn-block">
-            {current === null ? "Add" : "Update"} Contact
+      {current && (
+        <div>
+          <button className='btn btn-light btn-block' onClick={clearAll}>
+            Clear
           </button>
         </div>
-        {current && (
-          <div className="form-group">
-            <button className="btn btn-secondary btn-block" onClick={clearAll}>
-              Reset
-            </button>
-          </div>
-        )}
-      </form>
-    </>
+      )}
+    </form>
   );
 };
 
